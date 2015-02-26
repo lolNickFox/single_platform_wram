@@ -1,0 +1,135 @@
+---
+title: "single_platform_wram"
+author: "Nick Fox"
+date: "Wednesday, February 25, 2015"
+output: html_document
+---
+
+
+
+
+
+First I loaded in the data.
+The dummy code is: 
+
+Treatment: SEA = 1, SAL = 0.  
+Sex: Female = 1, Male = 0.
+
+```{r echo = FALSE}
+library(dplyr)
+library(ggplot2)
+library(broom)
+setwd("~/GitHub/single_platform_wram")
+
+wram_raw <- read.csv("one_platform_wram_raw.csv", header = TRUE)
+wram_raw <- tbl_df(wram_raw)
+
+wram_raw2 <- wram_raw %>%
+  group_by(Animal, Treatment, Day) %>%
+  mutate(avr_distance = mean(Distance)) %>%
+  mutate(avr_latency = mean(Duration))
+```
+
+
+# Distance Travelled by Day #
+
+```{r echo = FALSE}
+wram_raw %>%
+  ggplot(aes(x = Day, y = Distance, group = Treatment, colour = Treatment)) + geom_jitter()
+
+```
+
+### Then I ran a linear regression on the data and fit the regression line. ###
+
+```{r echo = FALSE}
+lm2 <- lm(Distance ~ Day + Treatment + Sex + Day:Treatment, data = wram_raw)
+summary(lm2)
+```
+
+```{r echo = FALSE}
+wram_raw %>%
+  ggplot(aes(x = Day, y = Distance, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.4) + geom_smooth(method = "lm", se = FALSE, size = 1)
+```
+
+
+As you can see from the summary of the regression model, there is a **significant main effect of day** on total distance travelled in the wRAM.  We did not detect an effect of SEA treatment or Sex.
+
+
+
+-----
+-----
+
+
+Here is the same information using the average of the four trials each day, so each animal has 1 measurement per day.
+
+```{r echo = FALSE}
+wram_raw2 %>%
+  distinct(Animal, avr_distance) %>%
+  ggplot(aes(x = Day, y = avr_distance, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.4) + geom_smooth(method = "lm", se = FALSE, size = 1)
+```
+
+```{r echo = FALSE}
+wram_raw3 <- wram_raw2 %>%
+  distinct(Animal, avr_distance)
+```
+
+
+I ran a regresson on this data as well, but the results are exactly the same (as you would expect)
+```{r echo = FALSE}
+lm4 <- lm(avr_distance ~ Day + Treatment + Sex + Day:Treatment, data = wram_raw3)
+
+summary(lm4)
+```
+
+
+
+-----
+-----
+
+
+# Latency to Reach Platform (Duration) by Day #
+
+```{r echo = FALSE}
+wram_raw %>%
+  ggplot(aes(x = Day, y = Duration, group = Treatment, colour = Treatment)) + geom_jitter()
+
+```
+
+### the linear regression of duration on day and the regression line: ###
+
+``` {r echo = FALSE}
+lm3 <- lm(Duration ~ Day + Treatment + Sex + Day:Treatment, data = wram_raw)
+summary(lm3)
+```
+
+```{r echo = FALSE}
+wram_raw %>%
+  ggplot(aes(x = Day, y = Duration, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.4) + geom_smooth(method = "lm", se = FALSE, size = 1)
+```
+
+As you can see from the summary of the regression model, there is a **significant main effect of day**  and a **significant main effect of sex (females took less time to find the platform)**.  We did not detect an effect of treatment.
+
+-----
+-----
+Here is the same information using the average of the four trials each day, so each animal has 1 measurement per day.
+
+```{r echo = FALSE}
+wram_raw2 %>%
+  distinct(Animal, avr_latency) %>%
+  ggplot(aes(x = Day, y = avr_latency, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.4) + geom_smooth(method = "lm", se = FALSE, size = 1)
+```
+
+And here is the regression on this averaged latency data:
+
+```{r echo = FALSE}
+wram_raw4 <- wram_raw2 %>%
+  distinct(Animal, avr_latency)
+```
+
+```{r echo = FALSE}
+lm5 <- lm(avr_latency ~ Day + Treatment + Sex + Day:Treatment, data = wram_raw4)
+
+summary(lm5)
+```
+
+The regression output is the same for the averaged data as it is for the whole data.
