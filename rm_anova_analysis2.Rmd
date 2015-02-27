@@ -55,7 +55,7 @@ wram_raw_male3 <- wram_raw_male2 %>%
 
 This next set of analyses comes from averaging the data by treatment per day.  Each treatment (SEA or Saline) has 1 point per day.  That point is the average of all of the measures made for the animals of that treatment that day.
 
-#Females - Average Distance Travelled
+#Females - Average Distance Traveled
 
 ```{r echo = FALSE}
 
@@ -83,7 +83,7 @@ summary(aov.out.F.avrlatency)
 #repeated measures anova for duration (females) using average latency by treatment
 ```
 
-#Males - Average Distance Travelled
+#Males - Average Distance Traveled
 
 ```{r echo = FALSE}
 
