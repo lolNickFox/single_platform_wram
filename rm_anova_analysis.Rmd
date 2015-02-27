@@ -18,12 +18,20 @@ library(broom)
 wram_raw <- read.csv("one_platform_wram_raw.csv", header = TRUE)
 
 wram_raw_male <- wram_raw %>%
-  filter(Female != "1")
+  filter(Sex != "Female")
 #makes male only dataframe
 
 wram_raw_female <- wram_raw %>%
-  filter(Female != "0")
+  filter(Sex != "Male")
 #makes the dataset of female animals only
+
+wram_raw_saline <- wram_raw %>%
+  filter(Treatment == "Saline", Day != "1")
+#makes a dataset of saline treated only
+
+wram_raw_SEA <- wram_raw %>%
+  filter(Treatment == "SEA", Day != "1")
+#makes a dataset of SEA treated only
 
 ```
 
@@ -33,7 +41,7 @@ wram_raw_female <- wram_raw %>%
 
 ```{r echo = FALSE}
 wram_raw_female %>%
-  ggplot(aes(x = Day, y = Distance, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1)
+  ggplot(aes(x = Day, y = Distance, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1) + scale_color_brewer(palette="Dark2")
 
 aov.outFdistance <- aov(Distance ~ Treatment * Day + Error(Animal), data = wram_raw_female)
 summary(aov.outFdistance)
@@ -46,7 +54,7 @@ summary(aov.outFdistance)
 
 ```{r echo = FALSE}
 wram_raw_female %>%
-  ggplot(aes(x = Day, y = Duration, group = Treatment, colour = Treatment)) + ylab("Latency to find platform (s)") + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1)
+  ggplot(aes(x = Day, y = Duration, group = Treatment, colour = Treatment)) + ylab("Latency to find platform (s)") + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1) + scale_color_brewer(palette="Dark2")
 
 aov.outFlatency <- aov(Duration ~ Treatment * Day + Error(Animal), data = wram_raw_female)
 summary(aov.outFlatency)
@@ -58,7 +66,7 @@ summary(aov.outFlatency)
 
 ```{r echo = FALSE}
 wram_raw_male %>%
-  ggplot(aes(x = Day, y = Distance, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1)
+  ggplot(aes(x = Day, y = Distance, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1) + scale_color_brewer(palette="Dark2")
 
 aov.outMdistance <- aov(Distance ~ Treatment * Day + Error(Animal), data = wram_raw_male)
 summary(aov.outMdistance)
@@ -69,9 +77,10 @@ summary(aov.outMdistance)
 #Males - Latency to find platform
 ```{r echo = FALSE}
 wram_raw_male %>%
-  ggplot(aes(x = Day, y = Duration, group = Treatment, colour = Treatment)) + ylab("Latency to find platform (s)") + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1)
+  ggplot(aes(x = Day, y = Duration, group = Treatment, colour = Treatment)) + ylab("Latency to find platform (s)") + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1) + scale_color_brewer(palette="Dark2")
 
 aov.outMlatency <- aov(Duration ~ Treatment * Day + Error(Animal), data = wram_raw_male)
 summary(aov.outMlatency)
 #repeated measures anova for duration (males)
 ```
+
