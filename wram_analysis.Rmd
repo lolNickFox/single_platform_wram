@@ -23,6 +23,7 @@ setwd("~/GitHub/single_platform_wram")
 
 wram_raw <- read.csv("one_platform_wram_raw.csv", header = TRUE)
 wram_raw <- tbl_df(wram_raw)
+head(wram_raw)
 
 wram_raw2 <- wram_raw %>%
   group_by(Animal, Treatment, Day) %>%

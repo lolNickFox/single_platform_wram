@@ -1,0 +1,77 @@
+---
+title: "repeated measures ANOVA"
+author: "Nick Fox"
+date: "Thursday, February 26, 2015"
+output: html_document
+---
+
+This is the single platform wRAM analysis using repeated measures ANOVA.
+
+```{r echo = FALSE}
+library(dplyr)
+library(ggplot2)
+library(broom)
+#load packages
+```
+
+```{r echo = FALSE}
+wram_raw <- read.csv("one_platform_wram_raw.csv", header = TRUE)
+
+wram_raw_male <- wram_raw %>%
+  filter(Female != "1")
+#makes male only dataframe
+
+wram_raw_female <- wram_raw %>%
+  filter(Female != "0")
+#makes the dataset of female animals only
+
+```
+
+
+#Females - Distance travelled
+
+
+```{r echo = FALSE}
+wram_raw_female %>%
+  ggplot(aes(x = Day, y = Distance, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1)
+
+aov.outFdistance <- aov(Distance ~ Treatment * Day + Error(Animal), data = wram_raw_female)
+summary(aov.outFdistance)
+#repeated measures anova for distance (females)
+
+```
+
+#Females - Latency to find platform
+
+
+```{r echo = FALSE}
+wram_raw_female %>%
+  ggplot(aes(x = Day, y = Duration, group = Treatment, colour = Treatment)) + ylab("Latency to find platform (s)") + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1)
+
+aov.outFlatency <- aov(Duration ~ Treatment * Day + Error(Animal), data = wram_raw_female)
+summary(aov.outFlatency)
+#repeated measures anova for duration (females)
+
+```
+
+#Males - Distance Travelled
+
+```{r echo = FALSE}
+wram_raw_male %>%
+  ggplot(aes(x = Day, y = Distance, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1)
+
+aov.outMdistance <- aov(Distance ~ Treatment * Day + Error(Animal), data = wram_raw_male)
+summary(aov.outMdistance)
+#repeated measures anova for distance (males)
+
+```
+
+#Males - Latency to find platform
+```{r echo = FALSE}
+wram_raw_male %>%
+  ggplot(aes(x = Day, y = Duration, group = Treatment, colour = Treatment)) + ylab("Latency to find platform (s)") + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1)
+
+aov.outMlatency <- aov(Duration ~ Treatment * Day + Error(Animal), data = wram_raw_male)
+summary(aov.outMlatency)
+#repeated measures anova for duration (males)
+```
