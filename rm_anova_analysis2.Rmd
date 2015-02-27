@@ -17,6 +17,9 @@ library(broom)
 
 wram_raw <- read.csv("one_platform_wram_raw.csv", header = TRUE)
 
+se <- function(x) sqrt(var(x)/length(x))
+#adds a function to make standard error calculations (for error bars)
+
 wram_raw_male <- wram_raw %>%
   filter(Sex != "Female")
 #makes male only dataframe
@@ -29,13 +32,23 @@ wram_raw_female2 <- wram_raw_female %>%
   dplyr::group_by(Day, Animal) %>%
   dplyr::mutate(avr.latency = mean(Duration), avr.distance = mean(Distance)) %>%
   distinct(avr.latency, avr.distance)
-#create a new data frame with average latency and average distance travelled by treatment for females
+#create a new data frame with average latency and average distance travelled per female per day (averaged trials)
 
 wram_raw_male2 <- wram_raw_male %>%
   dplyr::group_by(Day, Animal) %>%
   dplyr::mutate(avr.latency = mean(Duration), avr.distance = mean(Distance)) %>%
   distinct(avr.latency, avr.distance)
-#create a new data frame with average latency and average distance travelled by treatment for males
+#create a new data frame with average latency and average distance travelled per male per day (averaged trials)
+
+wram_raw_female3 <- wram_raw_female2 %>%
+  dplyr::group_by(Day, Treatment) %>%
+  dplyr::mutate(mean.treatment.latency = mean(avr.latency), sd.treatment.latency = sd(avr.latency), sem.treatment.latency = se(avr.latency), mean.treatment.distance = mean(avr.distance), sd.treatment.distance = sd(avr.distance), sem.treatment.distance = se(avr.distance))
+#made a new dataframe with mean, std, and SEM calculated by animal x day and by treatment x day
+##avr.latency and avr.distance are animal by day. ##mean.latency and mean.distance are treatment
+
+wram_raw_male3 <- wram_raw_male2 %>%
+  dplyr::group_by(Day, Treatment) %>%
+  dplyr::mutate(mean.treatment.latency = mean(avr.latency), sd.treatment.latency = sd(avr.latency), sem.treatment.latency = se(avr.latency), mean.treatment.distance = mean(avr.distance), sd.treatment.distance = sd(avr.distance), sem.treatment.distance = se(avr.distance))
 
 ```
 
@@ -46,8 +59,9 @@ This next set of analyses comes from averaging the data by treatment per day.  E
 
 ```{r echo = FALSE}
 
-wram_raw_female2 %>%
-  ggplot(aes(x = Day, y = avr.distance, group = Treatment, colour = Treatment)) + ylab("Average distance travelled (m)")+ geom_point(size = 4) + geom_line(size = 1) + scale_color_brewer(palette="Dark2")
+wram_raw_female3 %>%
+  group_by(Day, Treatment) %>%
+  ggplot(aes(x = Day, y = mean.treatment.distance, group = Treatment, colour = Treatment)) + ylab("Average distance travelled (m)")+ geom_point(size = 4) + geom_line(size = 1) + scale_color_brewer(palette="Dark2") + geom_errorbar(aes(ymin = mean.treatment.distance - sem.treatment.distance, ymax = mean.treatment.distance + sem.treatment.distance), width = 0.1)
 #graph the average distance by treatment
 
 aov.out.F.avrdistance <- aov(avr.distance ~ Treatment * Day + Error(Animal), data = wram_raw_female2)
@@ -59,8 +73,9 @@ summary(aov.out.F.avrdistance)
 
 ```{r echo = FALSE}
 
-wram_raw_female2 %>%
-  ggplot(aes(x = Day, y = avr.latency, group = Treatment, colour = Treatment)) + ylab("Average latency to find platform (s)") + geom_point(size = 4) + geom_line(size = 1) + scale_color_brewer(palette="Dark2")
+wram_raw_female3 %>%
+  group_by(Day, Treatment) %>%
+  ggplot(aes(x = Day, y = mean.treatment.latency, group = Treatment, colour = Treatment)) + ylab("Average latency to find platform (s)") + geom_point(size = 4) + geom_line(size = 1) + scale_color_brewer(palette="Dark2") + geom_errorbar(aes(ymin = mean.treatment.latency - sem.treatment.latency, ymax = mean.treatment.latency + sem.treatment.latency), width = 0.1)
 #graph the average latency by treatment
 
 aov.out.F.avrlatency <- aov(avr.latency ~ Treatment * Day + Error(Animal), data = wram_raw_female2)
@@ -72,8 +87,9 @@ summary(aov.out.F.avrlatency)
 
 ```{r echo = FALSE}
 
-wram_raw_male2 %>%
-  ggplot(aes(x = Day, y = avr.distance, group = Treatment, colour = Treatment)) + ylab("Average distance travelled (m)")+ geom_point(size = 4) + geom_line(size = 1) + scale_color_brewer(palette="Dark2")
+wram_raw_male3 %>%
+    group_by(Day, Treatment) %>%
+    ggplot(aes(x = Day, y = mean.treatment.distance, group = Treatment, colour = Treatment)) + ylab("Average distance travelled (m)")+ geom_point(size = 4) + geom_line(size = 1) + scale_color_brewer(palette="Dark2") + geom_errorbar(aes(ymin = mean.treatment.distance - sem.treatment.distance, ymax = mean.treatment.distance + sem.treatment.distance), width = 0.1)
 #graph the average distance by treatment
 
 aov.out.M.avrdistance <- aov(avr.distance ~ Treatment * Day + Error(Animal), data = wram_raw_male2)
@@ -85,10 +101,21 @@ summary(aov.out.M.avrdistance)
 
 ```{r echo = FALSE}
 
-wram_raw_male2 %>%
-  ggplot(aes(x = Day, y = avr.latency, group = Treatment, colour = Treatment)) + ylab("Average latency to find platform (s)") + geom_point(size = 4) + geom_line(size = 1) + scale_color_brewer(palette="Dark2")
+wram_raw_male3 %>%
+    group_by(Day, Treatment) %>%
+  ggplot(aes(x = Day, y = mean.treatment.latency, group = Treatment, colour = Treatment)) + ylab("Average latency to find platform (s)") + geom_point(size = 4) + geom_line(size = 1) + scale_color_brewer(palette="Dark2") + geom_errorbar(aes(ymin = mean.treatment.latency - sem.treatment.latency, ymax = mean.treatment.latency + sem.treatment.latency), width = 0.1)
 #graph the average latency by treatment
 
-aov.out.M.avrlatency <- aov(avr.latency ~ Treatment * Day + Error(Test/(Treatment * Day)), data = wram_raw_male2)
+aov.out.M.avrlatency <- aov(avr.latency ~ Treatment * Day + Error(Animal), data = wram_raw_male2)
 summary(aov.out.M.avrlatency)
+```
+
+
+
+
+
+```{r}
+wram_raw_female3 <- wram_raw_female2 %>%
+  dplyr::group_by(Day, Treatment) %>%
+  dplyr::mutate(mean.latency = mean(avr.latency), sd.latency = sd(avr.latency), sem.latency = se(avr.latency), mean.distance = mean(avr.distance), sem.distance = se(avr.distance))
 ```
