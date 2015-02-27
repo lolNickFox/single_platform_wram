@@ -1,11 +1,9 @@
 ---
-title: "repeated measures ANOVA"
+title: "rm_anova_analysis2"
 author: "Nick Fox"
-date: "Thursday, February 26, 2015"
+date: "Friday, February 27, 2015"
 output: html_document
 ---
-
-This is the single platform wRAM analysis using repeated measures ANOVA.
 
 ```{r echo = FALSE}
 library(dplyr)
@@ -14,7 +12,9 @@ library(broom)
 #load packages
 ```
 
+
 ```{r echo = FALSE}
+
 wram_raw <- read.csv("one_platform_wram_raw.csv", header = TRUE)
 
 wram_raw_male <- wram_raw %>%
@@ -23,74 +23,22 @@ wram_raw_male <- wram_raw %>%
 
 wram_raw_female <- wram_raw %>%
   filter(Sex != "Male")
-#makes the dataset of female animals only
+#makes female only dataframe
 
 wram_raw_female2 <- wram_raw_female %>%
-  dplyr::group_by(Day, Treatment) %>%
+  dplyr::group_by(Day, Animal) %>%
   dplyr::mutate(avr.latency = mean(Duration), avr.distance = mean(Distance)) %>%
   distinct(avr.latency, avr.distance)
 #create a new data frame with average latency and average distance travelled by treatment for females
 
 wram_raw_male2 <- wram_raw_male %>%
-  dplyr::group_by(Day, Treatment) %>%
+  dplyr::group_by(Day, Animal) %>%
   dplyr::mutate(avr.latency = mean(Duration), avr.distance = mean(Distance)) %>%
   distinct(avr.latency, avr.distance)
 #create a new data frame with average latency and average distance travelled by treatment for males
 
 ```
 
-
-#Females - Distance travelled
-
-
-```{r echo = FALSE}
-
-wram_raw_female %>%
-  ggplot(aes(x = Day, y = Distance, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1) + scale_color_brewer(palette="Dark2")
-
-aov.outFdistance <- aov(Distance ~ Treatment * Day + Error(Animal), data = wram_raw_female)
-summary(aov.outFdistance)
-#repeated measures anova for distance (females)
-
-```
-
-#Females - Latency to find platform
-
-
-```{r echo = FALSE}
-
-wram_raw_female %>%
-  ggplot(aes(x = Day, y = Duration, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1) + scale_color_brewer(palette="Dark2")
-
-aov.outFlatency <- aov(Duration ~ Treatment * Day + Error(Animal), data = wram_raw_female)
-summary(aov.outFlatency)
-
-```
-
-#Males - Distance Travelled
-
-```{r echo = FALSE}
-wram_raw_male %>%
-  ggplot(aes(x = Day, y = Distance, group = Treatment, colour = Treatment)) + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1) + scale_color_brewer(palette="Dark2")
-
-aov.outMdistance <- aov(Distance ~ Treatment * Day + Error(Animal), data = wram_raw_male)
-summary(aov.outMdistance)
-#repeated measures anova for distance (males)
-
-```
-
-#Males - Latency to find platform
-```{r echo = FALSE}
-wram_raw_male %>%
-  ggplot(aes(x = Day, y = Duration, group = Treatment, colour = Treatment)) + ylab("Latency to find platform (s)") + geom_jitter(alpha = 0.5) + geom_smooth(method = "lm", se = FALSE, size = 1) + scale_color_brewer(palette="Dark2")
-
-aov.outMlatency <- aov(Duration ~ Treatment * Day + Error(Animal), data = wram_raw_male)
-summary(aov.outMlatency)
-#repeated measures anova for duration (males)
-```
-
------
------
 
 This next set of analyses comes from averaging the data by treatment per day.  Each treatment (SEA or Saline) has 1 point per day.  That point is the average of all of the measures made for the animals of that treatment that day.
 
@@ -141,6 +89,6 @@ wram_raw_male2 %>%
   ggplot(aes(x = Day, y = avr.latency, group = Treatment, colour = Treatment)) + ylab("Average latency to find platform (s)") + geom_point(size = 4) + geom_line(size = 1) + scale_color_brewer(palette="Dark2")
 #graph the average latency by treatment
 
-aov.out.M.avrlatency <- aov(avr.latency ~ Treatment * Day + Error(Animal), data = wram_raw_male2)
+aov.out.M.avrlatency <- aov(avr.latency ~ Treatment * Day + Error(Test/(Treatment * Day)), data = wram_raw_male2)
 summary(aov.out.M.avrlatency)
 ```
