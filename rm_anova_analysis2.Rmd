@@ -49,6 +49,8 @@ wram_raw_female3 <- wram_raw_female2 %>%
 wram_raw_male3 <- wram_raw_male2 %>%
   dplyr::group_by(Day, Treatment) %>%
   dplyr::mutate(mean.treatment.latency = mean(avr.latency), sd.treatment.latency = sd(avr.latency), sem.treatment.latency = se(avr.latency), mean.treatment.distance = mean(avr.distance), sd.treatment.distance = sd(avr.distance), sem.treatment.distance = se(avr.distance))
+#made a new dataframe with mean, std, and SEM calculated by animal x day and by treatment x day
+##avr.latency and avr.distance are animal by day. ##mean.latency and mean.distance are treatment
 
 ```
 
